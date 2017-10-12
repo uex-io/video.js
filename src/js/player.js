@@ -313,14 +313,14 @@ class Player extends Component {
     super(null, options, ready);
 
     // we don't want a source change for the first source set
-    let sourceSet = false;
+    let initialSourceSet = false;
 
     if (tag.src) {
-      sourceSet = true;
+      initialSourceSet = true;
     }
     const triggerSourceChange = () => {
-      if (!sourceSet) {
-        sourceSet = true;
+      if (!initialSourceSet) {
+        initialSourceSet = true;
         return;
       }
       this.trigger('sourcechange');
@@ -329,12 +329,11 @@ class Player extends Component {
     if (window.MutationObserver) {
       this.videoSrcObserver_ = new window.MutationObserver(triggerSourceChange);
       this.videoSrcObserver_.observe(tag, {attributes: true, attributeFilter: ['src']});
-
     } else {
-      // IE 9/10 do not support MutationObservers
-      // use the old Mutation events
-      tag.addEventListener('DOMAttrModified', (event) => {
-        if ((/src/i).test(event.attrName)) {
+      Object.defineProperty(tag, 'src', {
+        get: () => tag.getAttribute('src'),
+        set: (s) => {
+          tag.setAttribute('src', s);
           triggerSourceChange();
         }
       });
@@ -344,7 +343,9 @@ class Player extends Component {
     tag.load = () => {
       const retval = tag.load_();
 
-      triggerSourceChange();
+      if (!this.loading_) {
+        triggerSourceChange();
+      }
 
       return retval;
     };
@@ -2426,7 +2427,9 @@ class Player extends Component {
    * Begin loading the src data.
    */
   load() {
+    this.loading_ = true;
     this.techCall_('load');
+    this.loading_ = false;
   }
 
   /**
