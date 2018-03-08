@@ -41,8 +41,7 @@
     "prepublish": "not-in-install && run-p build || in-install",
     "publish": "node build/gh-release.js",
     "prepush": "npm run lint -- --errors",
-    "version": "node build/version.js && git add CHANGELOG.md",
-    "postinstall": "npm run build"
+    "version": "node build/version.js && git add CHANGELOG.md"
   },
   "repository": {
     "type": "git",
@@ -154,7 +153,10 @@
     "webpack": "^1.15.0"
   },
   "vjsstandard": {
-    "ignore": [
+    "ignore": 
+      "**/Gruntfile.js",
+      "**/es5/**",
+      "**/build/**",
       "!build/rollup.js",
       "**/dist/**",
       "**/docs/**",

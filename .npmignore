@@ -1,5 +1,1 @@
 # Exclude everything but the contents of the dist directory.
-**/*
-!dist/**
-!es5/**
-!src/css/**
