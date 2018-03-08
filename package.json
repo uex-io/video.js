@@ -153,7 +153,7 @@
     "webpack": "^1.15.0"
   },
   "vjsstandard": {
-    "ignore": 
+    "ignore": [
       "**/Gruntfile.js",
       "**/es5/**",
       "**/build/**",
