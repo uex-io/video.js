@@ -2,4 +2,7 @@
 **/*
 !dist/**
 !es5/**
-!src/css/**
+!src/**
+!build/**
+!Gruntfile.js
+
