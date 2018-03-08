@@ -1,0 +1,23 @@
+{
+	"parser": "babel-eslint",
+
+	"extends": ["eslint:recommended"],
+	"env": {
+		"es6": true,
+		"jquery": true
+	},
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		}
+	},
+	"globals": {
+		"window": true,
+		"XMLHttpRequest": true,
+		"atob": true,
+		"btoa": true
+	},
+	"rules": {
+	}
+}
