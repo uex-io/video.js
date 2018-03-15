@@ -6,5 +6,4 @@
 !build/**
 !Gruntfile.js
 !.babelrc
-!.eslintrc.json
 
