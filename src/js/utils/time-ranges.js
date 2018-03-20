@@ -30,7 +30,7 @@
  *           Returns the time offset at which a specified time range begins.
  *
  * @property {time-ranges:indexFunction} end
- *           Returns the time offset at which a specified time range begins.
+ *           Returns the time offset at which a specified time range ends.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/TimeRanges
  */
@@ -56,7 +56,8 @@ function rangeCheck(fnName, index, maxIndex) {
 }
 
 /**
- * Check if any of the time ranges are over the maximum index.
+ * Get the time for the specified index at the start or end
+ * of a TimeRange object.
  *
  * @param {string} fnName
  *        The function name to use for logging
@@ -83,7 +84,7 @@ function getRange(fnName, valueIndex, ranges, rangeIndex) {
 }
 
 /**
- * Create a time range object givent ranges of time.
+ * Create a time range object given ranges of time.
  *
  * @param {Array} [ranges]
  *        An array of time ranges.
