@@ -93,8 +93,8 @@ class TimeDisplay extends Component {
    *
    * @private
    */
-  formatTime_(time) {
-    return formatTime(time);
+  formatTime_(time, guide = time) {
+    return formatTime(time, guide);
   }
 
   /**
@@ -106,8 +106,8 @@ class TimeDisplay extends Component {
    *
    * @private
    */
-  updateFormattedTime_(time) {
-    const formattedTime = this.formatTime_(time);
+  updateFormattedTime_(time, guide = time) {
+    const formattedTime = this.formatTime_(time, guide);
 
     if (formattedTime === this.formattedTime_) {
       return;

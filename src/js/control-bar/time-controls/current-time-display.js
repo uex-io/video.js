@@ -47,7 +47,7 @@ class CurrentTimeDisplay extends TimeDisplay {
     // Allows for smooth scrubbing, when player can't keep up.
     const time = (this.player_.scrubbing()) ? this.player_.getCache().currentTime : this.player_.currentTime();
 
-    this.updateFormattedTime_(time);
+    this.updateFormattedTime_(time, this.player_.duration());
   }
 
   /**
