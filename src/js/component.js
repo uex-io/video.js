@@ -988,7 +988,7 @@ class Component {
 
     // if the computed value is still 0, it's possible that the browser is lying
     // and we want to check the offset values.
-    // This code also runs on IE8 and wherever getComputedStyle doesn't exist.
+    // This code also runs wherever getComputedStyle doesn't exist.
     if (computedWidthOrHeight === 0) {
       const rule = `offset${toTitleCase(widthOrHeight)}`;
 
@@ -1226,9 +1226,9 @@ class Component {
    *    {@link Component#dispose} gets called.
    * 2. The function callback will gets turned into a {@link Component~GenericCallback}
    *
-   * > Note: You can use `window.clearTimeout` on the id returned by this function. This
+   * > Note: You can't use `window.clearTimeout` on the id returned by this function. This
    *         will cause its dispose listener not to get cleaned up! Please use
-   *         {@link Component#clearTimeout} or {@link Component#dispose}.
+   *         {@link Component#clearTimeout} or {@link Component#dispose} instead.
    *
    * @param {Component~GenericCallback} fn
    *        The function that will be run after `timeout`.
