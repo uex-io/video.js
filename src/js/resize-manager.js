@@ -47,7 +47,10 @@ class ResizeManager extends Component {
     }
 
     // Only create an element when ResizeObserver isn't available
-    const options_ = mergeOptions({createEl: !RESIZE_OBSERVER_AVAILABLE}, options);
+    const options_ = mergeOptions({
+      createEl: !RESIZE_OBSERVER_AVAILABLE,
+      reportTouchActivity: false
+    }, options);
 
     super(player, options_);
 
@@ -97,7 +100,9 @@ class ResizeManager extends Component {
 
   dispose() {
     if (this.resizeObserver_) {
-      this.resizeObserver_.unobserve(this.player_.el());
+      if (this.player_.el()) {
+        this.resizeObserver_.unobserve(this.player_.el());
+      }
       this.resizeObserver_.disconnect();
     }
 
@@ -109,10 +114,15 @@ class ResizeManager extends Component {
       this.off('load', this.loadListener_);
     }
 
+    if (this.debouncedHandler_) {
+      this.debouncedHandler_.cancel();
+    }
+
     this.ResizeObserver = null;
     this.resizeObserver = null;
     this.debouncedHandler_ = null;
     this.loadListener_ = null;
+    super.dispose();
   }
 
 }
