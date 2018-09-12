@@ -8,4 +8,5 @@ dist/video-js-*.zip
 !Gruntfile.js
 !.babelrc
 !core.js
+!rollup.config.js
 
