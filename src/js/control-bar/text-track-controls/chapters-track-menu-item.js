@@ -34,7 +34,11 @@ class ChaptersTrackMenuItem extends MenuItem {
 
     this.track = track;
     this.cue = cue;
-    track.addEventListener('cuechange', Fn.bind(this, this.update));
+
+    const updateInstance = Fn.bind(this, this.update);
+
+    track.addEventListener('cuechange', updateInstance);
+    this.on('dispose', () => track.removeEventListener('cuechange', updateInstance));
   }
 
   /**
