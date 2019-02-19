@@ -116,13 +116,18 @@ class PlayToggle extends Button {
    * @listens Player#ended
    */
   handleEnded(event) {
-    this.removeClass('vjs-playing');
-    this.addClass('vjs-ended');
-    // change the button text to "Replay"
-    this.controlText('Replay');
+    // We sometimes see two ended events (one from contrib ads)
+    // This causes a problem if we seek or restart in between
+    // Are we still at the end?
+    if (Math.abs(this.player_.currentTime() - this.player_.duration()) < 0.5) {
+      this.removeClass('vjs-playing');
+      this.addClass('vjs-ended');
+      // change the button text to "Replay"
+      this.controlText('Replay');
 
-    // on the next seek remove the replay button
-    this.one(this.player_, 'seeked', this.handleSeeked);
+      // on the next seek remove the replay button
+      this.one(this.player_, 'seeked', this.handleSeeked);
+    }
   }
 }
 
