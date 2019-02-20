@@ -6,6 +6,7 @@
 
 * [Standard &lt;video> Element Options](#standard-video-element-options)
   * [autoplay](#autoplay)
+    * [More info on autoplay support and changes:](#more-info-on-autoplay-support-and-changes)
   * [controls](#controls)
   * [height](#height)
   * [loop](#loop)
@@ -20,6 +21,7 @@
 * [Video.js-specific Options](#videojs-specific-options)
   * [aspectRatio](#aspectratio)
   * [autoSetup](#autosetup)
+  * [breakpoints](#breakpoints)
   * [children](#children)
   * [fluid](#fluid)
   * [inactivityTimeout](#inactivitytimeout)
@@ -29,9 +31,9 @@
   * [notSupportedMessage](#notsupportedmessage)
   * [playbackRates](#playbackrates)
   * [plugins](#plugins)
-  * [sourceOrder](#sourceorder)
+  * [responsive](#responsive)
   * [sources](#sources)
-  * [techCanOverridePoster](#techCanOverridePoster)
+  * [techCanOverridePoster](#techcanoverrideposter)
   * [techOrder](#techorder)
   * [vtt.js](#vttjs)
 * [Component Options](#component-options)
@@ -80,7 +82,8 @@ player.autoplay('muted');
 ```
 
 #### More info on autoplay support and changes:
-* See our blog post: https://blog.videojs.com/autoplay-best-practices-with-video-js/
+
+* See our blog post: <https://blog.videojs.com/autoplay-best-practices-with-video-js/>
 
 ### `controls`
 
@@ -162,6 +165,47 @@ Prevents the player from running the autoSetup for media elements with `data-set
 
 > **Note**: this must be set globally with `videojs.options.autoSetup = false` in the same tick as videojs source is loaded to take effect.
 
+### `breakpoints`
+
+> Type: `Object`
+
+When used with the [`responsive` option](#responsive), sets breakpoints that will configure how class names are toggled on the player to adjust the UI based on the player's dimensions.
+
+By default, the breakpoints are:
+
+| Class Name           | Width Range |
+| -------------------- | ----------- |
+| `vjs-layout-tiny`    | 0-210       |
+| `vjs-layout-x-small` | 211-320     |
+| `vjs-layout-small`   | 321-425     |
+| `vjs-layout-medium`  | 426-768     |
+| `vjs-layout-large`   | 769-1440    |
+| `vjs-layout-x-large` | 1441-2560   |
+| `vjs-layout-huge`    | 2561+       |
+
+While the class names cannot be changed, the width ranges can be configured via an object like this:
+
+```js
+breakpoints: {
+  tiny: 300,
+  xsmall: 400,
+  small: 500,
+  medium: 600,
+  large: 700,
+  xlarge: 800,
+  huge: 900
+}
+```
+
+* The _keys_ of the `breakpoints` object are derived from the associated class names by removing the `vjs-layout-` prefix and any `-` characters.
+* The _values_ of the `breakpoints` object define the max width for a range.
+* Not all keys need to be defined. You can easily override a single breakpoint by passing an object with one key/value pair! Customized breakpoints will be merged with default breakpoints when the player is created.
+
+When the player's size changes, the merged breakpoints will be inspected in the size order until a matching breakpoint is found.
+
+That breakpoint's associated class name will be added as a class to the player. The previous breakpoint's class will be removed.
+
+See the file `sandbox/responsive.html.example` for an example of a responsive player using the default breakpoints.
 
 ### `children`
 
@@ -202,6 +246,18 @@ Customize which languages are available in a player. The keys of this object wil
 Learn more about [languages in Video.js][languages]
 
 > **Note**: Generally, this option is not needed and it would be better to pass your custom languages to `videojs.addLanguage()`, so they are available in all players!
+
+### `liveui`
+
+> Type: `boolean`
+> Default: `false`
+
+Allows the player to use the new live ui that includes:
+* A progress bar for seeking within the live window
+* A button that can be clicked to seek to the live edge with a circle indicating if you are at the live edge or not.
+
+Without this option the progress bar will be hidden and in its place will be text that indicates `LIVE` playback. There will be no progress control
+and you will not be able click the text to seek to the live edge. `liveui` will default to `true` in a future version!
 
 ### `nativeControlsForTouch`
 
@@ -260,6 +316,14 @@ player.boo({baz: false});
 Although, since the `plugins` option is an object, the order of initialization is not guaranteed!
 
 See [the plugins guide][plugins] for more information on Video.js plugins.
+
+### `responsive`
+
+> Type: `boolean`, Default: `false`
+
+Setting this option to `true` will cause the player to customize itself based on responsive breakpoints (see: [`breakpoints` option](#breakpoints)).
+
+When this option is `false` (the default), responsive breakpoints will be ignored.
 
 ### `sources`
 
