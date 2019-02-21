@@ -9,4 +9,8 @@ dist/video-js-*.zip
 !.babelrc
 !core.js
 !rollup.config.js
+!lang/**
+!sandbox/**
+!test/**
+!docs/**
 
