@@ -111,8 +111,9 @@ class TimeTooltip extends Component {
     this.rafId_ = this.requestAnimationFrame(() => {
       let content;
       const duration = this.player_.duration();
+      const liveTracker = this.player_.liveTracker;
 
-      if (this.player_.liveTracker && this.player_.liveTracker.isLive()) {
+      if (liveTracker && liveTracker.isLive()) {
         const liveWindow = liveTracker.seekableEnd() - liveTracker.seekableStart();
         const secondsBehind = liveWindow - (seekBarPoint * liveWindow);
 
