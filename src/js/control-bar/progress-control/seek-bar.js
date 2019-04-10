@@ -197,7 +197,8 @@ class SeekBar extends Slider {
     const liveTracker = this.player_.liveTracker;
 
     if (liveTracker && liveTracker.isLive()) {
-      percent = (currentTime - liveTracker.seekableStart()) / liveTracker.liveWindow();
+      const window = liveTracker.seekableEnd() - liveTracker.seekableStart();
+      percent = (currentTime - (liveTracker.seekableStart() + liveTracker.pastSeekEnd())) / window;
 
       // prevent the percent from changing at the live edge
       if (liveTracker.atLiveEdge()) {

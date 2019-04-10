@@ -94,7 +94,10 @@ class LiveTracker extends Component {
 
     this.on(this.player_, 'play', this.trackLive_);
     this.on(this.player_, 'pause', this.trackLive_);
-    this.one(this.player_, 'play', this.handlePlay);
+
+    if(!this.player_.autoplay()) {
+      this.one(this.player_, 'play', this.handlePlay);
+    }
 
     // this is to prevent showing that we are not live
     // before a video starts to play

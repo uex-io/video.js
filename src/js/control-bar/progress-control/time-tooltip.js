@@ -113,7 +113,7 @@ class TimeTooltip extends Component {
       const duration = this.player_.duration();
 
       if (this.player_.liveTracker && this.player_.liveTracker.isLive()) {
-        const liveWindow = this.player_.liveTracker.liveWindow();
+        const liveWindow = liveTracker.seekableEnd() - liveTracker.seekableStart();
         const secondsBehind = liveWindow - (seekBarPoint * liveWindow);
 
         content = (secondsBehind < 1 ? '' : '-') + formatTime(secondsBehind, liveWindow);
