@@ -1,14 +1,18 @@
 // Fake a media playback tech controller so that player tests
 // can run without HTML5 or Flash, of which PhantomJS supports neither.
 import Tech from '../../../src/js/tech/tech.js';
-
+import {createTimeRanges} from '../../../src/js/utils/time-ranges.js';
 /**
- * @constructor
+ * @class
  */
 class TechFaker extends Tech {
 
   constructor(options, handleReady) {
     super(options, handleReady);
+
+    if (this.options_ && this.options_.sourceset) {
+      this.fakeSourceset();
+    }
     if (!options || options.autoReady !== false) {
       this.triggerReady();
     }
@@ -37,15 +41,32 @@ class TechFaker extends Tech {
 
   setMuted() {}
 
-  setAutoplay() {}
+  setAutoplay(v) {
+    if (!v) {
+      this.options_.autoplay = false;
+    }
+
+    this.options_.autoplay = true;
+  }
 
   currentTime() {
     return 0;
   }
+  seekable() {
+    return createTimeRanges(0, 0);
+  }
   seeking() {
     return false;
   }
-  src() {
+  fakeSourceset() {
+    this.el_.src = this.options_.sourceset;
+    this.el_.setAttribute('src', this.options_.sourceset);
+    super.triggerSourceset(this.options_.sourceset);
+  }
+  src(src) {
+    if (typeof src !== 'undefined' && this.options_ && this.options_.sourceset) {
+      this.fakeSourceset();
+    }
     return 'movie.mp4';
   }
   currentSrc() {
@@ -58,7 +79,7 @@ class TechFaker extends Tech {
     return false;
   }
   autoplay() {
-    return false;
+    return this.options_.autoplay || false;
   }
   pause() {
     return false;

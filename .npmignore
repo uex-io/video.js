@@ -1,9 +1,16 @@
 # Exclude everything but the contents of the dist directory.
 **/*
 !dist/**
+dist/video-js-*.zip
 !es5/**
 !src/**
 !build/**
 !Gruntfile.js
 !.babelrc
+!core.js
+!rollup.config.js
+!lang/**
+!sandbox/**
+!test/**
+!docs/**
 

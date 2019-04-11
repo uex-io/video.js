@@ -49,6 +49,48 @@ QUnit.test('dispose should not throw if styleEl is missing', function(assert) {
   assert.ok(player.el() === null, 'element disposed');
 });
 
+QUnit.test('dispose should not throw if techEl is missing', function(assert) {
+  const videoTag = TestHelpers.makeTag();
+  const fixture = document.getElementById('qunit-fixture');
+
+  fixture.appendChild(videoTag);
+
+  const player = new Player(videoTag);
+
+  player.tech_.el_.parentNode.removeChild(player.tech_.el_);
+  player.tech_.el_ = null;
+  let error;
+
+  try {
+    player.dispose();
+  } catch (e) {
+    error = e;
+  }
+
+  assert.notOk(error, 'Function did not throw an error on dispose');
+});
+
+QUnit.test('dispose should not throw if playerEl is missing', function(assert) {
+  const videoTag = TestHelpers.makeTag();
+  const fixture = document.getElementById('qunit-fixture');
+
+  fixture.appendChild(videoTag);
+
+  const player = new Player(videoTag);
+
+  player.el_.parentNode.removeChild(player.el_);
+  player.el_ = null;
+  let error;
+
+  try {
+    player.dispose();
+  } catch (e) {
+    error = e;
+  }
+
+  assert.notOk(error, 'Function did not throw an error on dispose');
+});
+
 // technically, all uses of videojs.options should be replaced with
 // Player.prototype.options_ in this file and a equivalent test using
 // videojs.options should be made in video.test.js. Keeping this here
@@ -108,7 +150,7 @@ QUnit.test('should get tag, source, and track settings', function(assert) {
   assert.equal(player.options_.id, 'example_1', 'id is set to example_1');
   assert.equal(player.options_.sources.length, 2, 'we have two sources');
   assert.equal(player.options_.sources[0].src, 'http://google.com', 'first source is google.com');
-  assert.equal(player.options_.sources[0].type, 'video/mp4', 'first time is video/mp4');
+  assert.equal(player.options_.sources[0].type, 'video/mp4', 'first type is video/mp4');
   assert.equal(player.options_.sources[1].type, 'video/webm', 'second type is video/webm');
   assert.equal(player.options_.tracks.length, 1, 'we have one text track');
   assert.equal(player.options_.tracks[0].kind, 'captions', 'the text track is a captions file');
@@ -344,7 +386,7 @@ QUnit.test('should default to 16:9 when fluid', function(assert) {
   const player = TestHelpers.makePlayer({fluid: true});
   const ratio = player.currentHeight() / player.currentWidth();
 
-  // IE8 rounds 0.5625 up to 0.563
+  // account for some rounding of 0.5625 up to 0.563
   assert.ok(((ratio >= 0.562) && (ratio <= 0.563)), 'fluid player without dimensions defaults to 16:9');
 
   player.dispose();
@@ -358,6 +400,54 @@ QUnit.test('should set fluid to true if element has vjs-fluid class', function(a
   const player = TestHelpers.makePlayer({}, tag);
 
   assert.ok(player.fluid(), 'fluid is true with vjs-fluid class');
+
+  player.dispose();
+});
+
+QUnit.test('should set fill to true if element has vjs-fill class', function(assert) {
+  const tag = TestHelpers.makeTag();
+
+  tag.className += ' vjs-fill';
+
+  const player = TestHelpers.makePlayer({}, tag);
+
+  assert.ok(player.fill(), 'fill is true with vjs-fill class');
+
+  player.dispose();
+});
+
+QUnit.test('fill turns off fluid', function(assert) {
+  const tag = TestHelpers.makeTag();
+
+  tag.className += ' vjs-fluid';
+
+  const player = TestHelpers.makePlayer({}, tag);
+
+  assert.notOk(player.fill(), 'fill is false');
+  assert.ok(player.fluid(), 'fluid is true');
+
+  player.fill(true);
+
+  assert.ok(player.fill(), 'fill is true');
+  assert.notOk(player.fluid(), 'fluid is false');
+
+  player.dispose();
+});
+
+QUnit.test('fluid turns off fill', function(assert) {
+  const tag = TestHelpers.makeTag();
+
+  tag.className += ' vjs-fill';
+
+  const player = TestHelpers.makePlayer({}, tag);
+
+  assert.ok(player.fill(), 'fill is true');
+  assert.notOk(player.fluid(), 'fluid is false');
+
+  player.fluid(true);
+
+  assert.notOk(player.fill(), 'fill is false');
+  assert.ok(player.fluid(), 'fluid is true');
 
   player.dispose();
 });
@@ -914,6 +1004,8 @@ QUnit.test('should honor default inactivity timeout', function(assert) {
   // default timeout is 2000ms
   const player = TestHelpers.makePlayer({});
 
+  player.trigger('play');
+
   assert.equal(player.userActive(), true, 'User is active on creation');
   clock.tick(1800);
   assert.equal(player.userActive(), true, 'User is still active');
@@ -931,6 +1023,8 @@ QUnit.test('should honor configured inactivity timeout', function(assert) {
   const player = TestHelpers.makePlayer({
     inactivityTimeout: 200
   });
+
+  player.trigger('play');
 
   assert.equal(player.userActive(), true, 'User is active on creation');
   clock.tick(150);
@@ -1090,6 +1184,7 @@ if (window.Promise) {
 }
 
 QUnit.test('play promise should resolve to native value if returned', function(assert) {
+  const done = assert.async();
   const player = TestHelpers.makePlayer({});
 
   player.src({
@@ -1102,7 +1197,18 @@ QUnit.test('play promise should resolve to native value if returned', function(a
   player.tech_.play = () => 'foo';
   const p = player.play();
 
-  assert.equal(p, 'foo', 'play returns foo');
+  const finish = (v) => {
+    assert.equal(v, 'foo', 'play returns foo');
+    done();
+  };
+
+  if (typeof p === 'string') {
+    finish(p);
+  } else {
+    p.then((v) => {
+      finish(v);
+    });
+  }
 });
 
 QUnit.test('should throw on startup no techs are specified', function(assert) {
@@ -1354,14 +1460,80 @@ QUnit.test('player#reset loads the first item in the techOrder and then techCall
   assert.equal(techCallMethod, 'reset', 'we then reset the tech');
 });
 
-QUnit.test('Remove waiting class on timeupdate after tech waiting', function(assert) {
+QUnit.test('Remove waiting class after tech waiting when timeupdate shows a time change', function(assert) {
   const player = TestHelpers.makePlayer();
 
+  player.currentTime = () => 1;
   player.tech_.trigger('waiting');
-  assert.ok(/vjs-waiting/.test(player.el().className), 'vjs-waiting is added to the player el on tech waiting');
+  assert.ok(
+    /vjs-waiting/.test(player.el().className),
+    'vjs-waiting is added to the player el on tech waiting'
+  );
   player.trigger('timeupdate');
-  assert.ok(!(/vjs-waiting/).test(player.el().className), 'vjs-waiting is removed from the player el on timeupdate');
+  assert.ok(
+    /vjs-waiting/.test(player.el().className),
+    'vjs-waiting still exists on the player el when time hasn\'t changed on timeupdate'
+  );
+  player.currentTime = () => 2;
+  player.trigger('timeupdate');
+  assert.notOk(
+    (/vjs-waiting/).test(player.el().className),
+    'vjs-waiting removed from the player el when time has changed on timeupdate'
+  );
   player.dispose();
+});
+
+QUnit.test('Queues playing events when playback rate is zero while seeking', function(assert) {
+  const player = TestHelpers.makePlayer({techOrder: ['html5']});
+
+  let canPlayCount = 0;
+  let canPlayThroughCount = 0;
+  let playingCount = 0;
+  let seekedCount = 0;
+  let seeking = false;
+
+  player.on('canplay', () => canPlayCount++);
+  player.on('canplaythrough', () => canPlayThroughCount++);
+  player.on('playing', () => playingCount++);
+  player.on('seeked', () => seekedCount++);
+
+  player.tech_.seeking = () => {
+    return seeking;
+  };
+
+  player.tech_.setPlaybackRate(0);
+  player.tech_.trigger('ratechange');
+
+  player.tech_.trigger('canplay');
+  player.tech_.trigger('canplaythrough');
+  player.tech_.trigger('playing');
+  player.tech_.trigger('seeked');
+
+  assert.equal(canPlayCount, 1, 'canplay event dispatched when not seeking');
+  assert.equal(canPlayThroughCount, 1, 'canplaythrough event dispatched when not seeking');
+  assert.equal(playingCount, 1, 'playing event dispatched when not seeking');
+  assert.equal(seekedCount, 1, 'seeked event dispatched when not seeking');
+
+  seeking = true;
+  player.tech_.trigger('canplay');
+  player.tech_.trigger('canplaythrough');
+  player.tech_.trigger('playing');
+  player.tech_.trigger('seeked');
+
+  assert.equal(canPlayCount, 1, 'canplay event not dispatched');
+  assert.equal(canPlayThroughCount, 1, 'canplaythrough event not dispatched');
+  assert.equal(playingCount, 1, 'playing event not dispatched');
+  assert.equal(seekedCount, 1, 'seeked event not dispatched');
+
+  seeking = false;
+  player.tech_.setPlaybackRate(1);
+  player.tech_.trigger('ratechange');
+
+  assert.equal(canPlayCount, 2, 'canplay event dispatched after playback rate restore');
+  assert.equal(canPlayThroughCount, 2, 'canplaythrough event dispatched after playback rate restore');
+  assert.equal(playingCount, 2, 'playing event dispatched after playback rate restore');
+  assert.equal(seekedCount, 2, 'seeked event dispatched after playback rate restore');
+
 });
 
 QUnit.test('Make sure that player\'s style el respects VIDEOJS_NO_DYNAMIC_STYLE option', function(assert) {
@@ -1804,4 +1976,53 @@ QUnit.test('disposing a tech that dit NOT set a poster, should keep the poster',
   assert.equal(player.poster(), posterUrl, 'player poster should stay the same after unloading / dispoing tech');
 
   player.dispose();
+});
+
+QUnit.test('source options are retained', function(assert) {
+  const player = TestHelpers.makePlayer();
+
+  const source = {
+    src: 'https://some.url',
+    type: 'someType',
+    sourceOption: 'someOption'
+  };
+
+  player.src(source);
+
+  assert.equal(player.currentSource().sourceOption, 'someOption', 'source option retained');
+});
+
+QUnit.test('setting children to false individually, does not cause an assertion', function(assert) {
+  const defaultChildren = Player.prototype.options_.children;
+
+  defaultChildren.forEach((childName) => {
+    const options = {};
+
+    options[childName] = false;
+
+    const player = TestHelpers.makePlayer(options);
+
+    this.clock.tick(1000);
+
+    player.triggerReady();
+    player.dispose();
+    assert.ok(true, `${childName}: false. did not cause an assertion`);
+  });
+});
+
+QUnit.test('setting all children to false, does not cause an assertion', function(assert) {
+  const defaultChildren = Player.prototype.options_.children;
+  const options = {};
+
+  defaultChildren.forEach((childName) => {
+    options[childName] = false;
+  });
+
+  const player = TestHelpers.makePlayer(options);
+
+  this.clock.tick(1000);
+  player.triggerReady();
+
+  player.dispose();
+  assert.ok(true, 'did not cause an assertion');
 });
