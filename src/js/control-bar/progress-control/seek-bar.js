@@ -262,7 +262,7 @@ class SeekBar extends Slider {
       const seekableStart = liveTracker.seekableStart();
       const seekableEnd = liveTracker.seekableEnd();
 
-      newTime = seekableStart + (distance * (seekeableEnd - seekableStart));
+      newTime = seekableStart + (distance * (seekableEnd - seekableStart));
       // Include pastSeekEnd as tech needs a constantly ramping current time.
       newTime += liveTracker.pastSeekEnd();
 
