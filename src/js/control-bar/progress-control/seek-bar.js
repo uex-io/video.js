@@ -260,9 +260,11 @@ class SeekBar extends Slider {
       }
     } else {
       const seekableStart = liveTracker.seekableStart();
-      const seekableEnd = liveTracker.liveCurrentTime();
+      const seekableEnd = liveTracker.seekableEnd();
 
-      newTime = seekableStart + (distance * liveTracker.liveWindow());
+      newTime = seekableStart + (distance * (seekeableEnd - seekableStart));
+      // Include pastSeekEnd as tech needs a constantly ramping current time.
+      newTime += liveTracker.pastSeekEnd();
 
       // Don't let video end while scrubbing.
       if (newTime >= seekableEnd) {
